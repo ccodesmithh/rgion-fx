@@ -1,0 +1,32 @@
+{
+  "pipeline": {
+    "name": "RGION Basic Pipeline",
+    "passes": [
+      {
+        "name": "gbuffers_terrain",
+        "program": "gbuffers_terrain",
+        "framebuffer": "main"
+      },
+      {
+        "name": "composite",
+        "program": "composite",
+        "framebuffer": "main",
+        "samplers": {
+          "colortex0": "main"
+        }
+      },
+      {
+        "name": "final",
+        "program": "final",
+        "samplers": {
+          "colortex0": "main"
+        }
+      }
+    ]
+  },
+  "buffers": {
+    "main": {
+      "texFormat": "RGBA8"
+    }
+  }
+}
