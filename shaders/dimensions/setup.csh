@@ -11,8 +11,8 @@ const ivec3 workGroups = ivec3(6, 6, 1);
     const vec3 LightColor_Amethyst = vec3(0.464, 0.227, 0.788);
     const vec3 LightColor_Candles = vec3(1.0, 0.4, 0.1);
     const vec3 LightColor_CopperBulb = vec3(1.0, 0.7, 0.6);
-    const vec3 LightColor_LightBlock = vec3(1.0);
-    const vec3 LightColor_RedstoneTorch = vec3(0.939, 0.305, 0.164);
+    const vec3 LightColor_LightBlock = vec3(LIGHTBLOCK_R, LIGHTBLOCK_G, LIGHTBLOCK_B);
+    const vec3 LightColor_RedstoneTorch = vec3(REDSTONE_TORCH_R, REDSTONE_TORCH_G, REDSTONE_TORCH_B);
     const vec3 LightColor_SeaPickle = vec3(0.283, 0.394, 0.212);
 
     const vec3 LightColor_Candles_Black = vec3(0.200);
@@ -541,12 +541,12 @@ void main() {
         }
 
         if (blockId == BLOCK_GLOWSTONE || blockId == ITEM_GLOWSTONE) {
-            lightColor = vec3(0.747, 0.594, 0.326);
+            lightColor = vec3(GLOWSTONE_R, GLOWSTONE_G, GLOWSTONE_B);
             lightRange = 15.0;
         }
 
         if (blockId == ITEM_GLOWSTONE_DUST) {
-            lightColor = vec3(0.747, 0.594, 0.326);
+            lightColor = vec3(GLOWSTONE_R, GLOWSTONE_G, GLOWSTONE_B);
             lightRange = 8.0;
         }
 
@@ -562,11 +562,11 @@ void main() {
         }
 
         if (blockId == BLOCK_LAVA) {
-            lightColor = vec3(0.959, 0.302, 0.106);
+            lightColor = vec3(LAVA_R, LAVA_G, LAVA_B);
             lightRange = 15.0;
         }
         else if (blockId == ITEM_LAVA_BUCKET) {
-            lightColor = vec3(0.759, 0.302, 0.106);
+            lightColor = vec3(LAVA_R, LAVA_G, LAVA_B) * 0.8;
             lightRange = 8.0;
         }
 
@@ -769,17 +769,17 @@ void main() {
         }
         
         if (blockId == BLOCK_SEA_LANTERN || blockId == ITEM_SEA_LANTERN) {
-            lightColor = vec3(0.553, 0.748, 0.859);
+            lightColor = vec3(SEALANTERN_R, SEALANTERN_G, SEALANTERN_B);
             lightRange = 15.0;
         }
 
         if (blockId == BLOCK_SHROOMLIGHT || blockId == ITEM_SHROOMLIGHT) {
-            lightColor = vec3(0.848, 0.469, 0.205);
+            lightColor = vec3(SHROOMLIGHT_R, SHROOMLIGHT_G, SHROOMLIGHT_B);
             lightRange = 15.0;
         }
 
         if (blockId == BLOCK_SOUL_FIRE) {
-            lightColor = vec3(0.1, 0.6, 1.0);
+            lightColor = vec3(SOUL_FIRE_R, SOUL_FIRE_G, SOUL_FIRE_B);
             lightRange = 10.0;
             mixWeight = 1.0;
         }
@@ -788,7 +788,7 @@ void main() {
             blockId == BLOCK_SOUL_TORCH || blockId == ITEM_SOUL_TORCH ||
             blockId == BLOCK_SOUL_LANTERN || blockId == ITEM_SOUL_LANTERN
         ) {
-            lightColor = vec3(0.1, 0.6, 1.0);
+            lightColor = vec3(SOUL_FIRE_R, SOUL_FIRE_G, SOUL_FIRE_B);
             lightRange = 10.0;
             mixWeight = 0.8;
         }

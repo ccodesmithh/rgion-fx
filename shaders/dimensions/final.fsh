@@ -197,7 +197,7 @@ void main() {
     #endif
   #endif
   
-  #if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  
+  #if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT || defined RAIN_DROPLETS_SCREEN
     // for making the fun, more fun
     applyGameplayEffects(COLOR, texcoord, noise);
   #endif

@@ -181,6 +181,13 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	}
 	
 	vec3 scattering = scatteringAmbient * background + scatteringSun * sunColorBase + scatteringMoon*moonColorBase * 0.5;
+	// RGION FX: Blood Moon sky scattering tint
+	#if defined BLOOD_MOON
+		float _bmDay = floor(float(frameCounter) / (20.0 * 24000.0));
+		float _bmHash = fract(sin(_bmDay * 12.9898 + 78.233) * 43758.5453);
+		float _bmActive = (float(moonPhase == 0)) * step(1.0 - BLOOD_MOON_CHANCE * 0.01, _bmHash);
+		scattering = mix(scattering, scattering * vec3(BLOOD_MOON_R, BLOOD_MOON_G, BLOOD_MOON_B), _bmActive * 0.6);
+	#endif
 
 	return scattering;
 }

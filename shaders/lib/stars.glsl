@@ -100,3 +100,44 @@ float stars(vec3 viewPos, out vec3 starColor){
         return 75.0 * STARS_BRIGHTNESS * exp( stars  * -20.0 * (1.0/STARS_AMOUNT));
     #endif
 }
+
+// RGION FX: Shooting Stars / Meteor effect
+vec3 shootingStar(vec3 viewDir, float time, float seed) {
+    #ifdef SHOOTING_STARS
+        // Use time and seed to deterministically create shooting star events
+        float eventSeed = floor(time * 0.1 * SHOOTING_STARS_SPEED + seed * 100.0);
+        float eventHash = hash13(vec3(eventSeed, 42.0, 7.0));
+        
+        // Only spawn if random chance hits
+        if (eventHash > SHOOTING_STARS_CHANCE) return vec3(0.0);
+        
+        // Position: random direction on the sky hemisphere
+        float theta = eventHash * 6.283;
+        float phi = acos(1.0 - hash13(vec3(eventSeed, 13.0, 3.0)) * 0.8);
+        vec3 starDir = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
+        
+        // Animate: progress from start to end over ~2 seconds
+        float progress = fract(time * 0.5 * SHOOTING_STARS_SPEED + eventHash * 2.0);
+        float life = 1.0 - progress;
+        
+        // Movement direction (slightly downward)
+        float moveAngle = hash13(vec3(eventSeed, 77.0, 11.0)) * 0.5 - 0.25;
+        vec3 moveDir = normalize(vec3(cos(moveAngle), -0.3 - abs(moveAngle), sin(moveAngle)));
+        vec3 currentPos = starDir + moveDir * progress * 0.3;
+        
+        // Check if this pixel is near the shooting star path
+        float dist = distance(viewDir, normalize(currentPos));
+        float headDist = distance(viewDir, normalize(currentPos + moveDir * 0.02));
+        
+        // Bright head + fading tail
+        float headBrightness = smoothstep(0.02, 0.0, headDist) * life * 15.0;
+        float tailBrightness = smoothstep(0.08, 0.01, dist) * life * 3.0;
+        
+        // Color: warm white to slight gold
+        vec3 color = mix(vec3(1.0, 0.95, 0.8), vec3(1.0), headBrightness / (headBrightness + 0.001));
+        
+        return (headBrightness + tailBrightness) * color;
+    #else
+        return vec3(0.0);
+    #endif
+}

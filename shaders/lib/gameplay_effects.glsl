@@ -10,6 +10,7 @@
     uniform bool isDead;
 #endif
 
+uniform float rainStrength;
 uniform float exitWater;
 uniform float enterWater;
 uniform float exitLava;
@@ -83,6 +84,47 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
             distortmask = max(distortmask, waterSplash);
         }
     #endif
+    //////////////////////// RAIN DROPLETS /////////////////////
+    #ifdef RAIN_DROPLETS_SCREEN
+        if (rainStrength > 0.01) {
+            vec2 uv = texcoord * vec2(aspectRatio, 1.0) * 8.0;
+            float rainAnim = frameTimeCounter * 1.5;
+            
+            // two overlapping layers at different scales to break grid
+            float dropletMask = 0.0;
+            
+            // layer 1: coarse droplets
+            vec2 g1 = floor(uv);
+            vec2 c1 = g1 + 0.5 + texture(noisetex, g1 * 0.1 + rainAnim * 0.05).rg * 0.6;
+            float d1 = length(uv - c1);
+            float r1 = 0.12 + texture(noisetex, g1 * 0.1 + 50.0).r * 0.08;
+            float fall1 = 1.0 - fract(rainAnim * (0.7 + texture(noisetex, g1 * 0.1 + 100.0).r * 0.5));
+            float mask1 = smoothstep(r1 + 0.03, r1 - 0.03, d1) * fall1;
+            dropletMask += mask1;
+            
+            // layer 2: fine droplets, offset
+            vec2 g2 = floor(uv * 1.7 + vec2(7.3, 13.7));
+            vec2 c2 = g2 + 0.5 + texture(noisetex, g2 * 0.15 + rainAnim * 0.07 + 500.0).rg * 0.4;
+            float d2 = length(uv * 1.7 - c2);
+            float r2 = 0.06 + texture(noisetex, g2 * 0.15 + 200.0).r * 0.04;
+            float fall2 = 1.0 - fract(rainAnim * (0.5 + texture(noisetex, g2 * 0.15 + 300.0).r * 0.5));
+            dropletMask += smoothstep(r2 + 0.02, r2 - 0.02, d2) * 0.5 * fall2;
+            
+            // rivulets: irregular vertical streaks
+            vec2 rivUV = uv * vec2(0.8, 0.12) + vec2(0.0, rainAnim * 0.25);
+            float riv = texture(noisetex, rivUV).r;
+            float rivMask = smoothstep(0.55, 0.75, riv) * step(abs(fract(uv.x * 0.6 + rainAnim * 0.08) - 0.5), 0.03);
+            
+            float totalMask = max(dropletMask, rivMask * 0.5) * rainStrength * RAIN_DROPLETS_STRENGTH;
+            
+            // ADD DISTORTION for refraction effect (like water exit effect)
+            distortmask = max(distortmask, totalMask);
+            
+            // visible overlay
+            vec3 rainColor = vec3(0.8, 0.85, 0.95);
+            color = mix(color, rainColor, totalMask);
+        }
+    #endif
     //////////////////////// HEAT DISTORTION /////////////////////
     #if defined ON_FIRE_DISTORT_EFFECT
       if(exitLava > 0.0){
@@ -107,9 +149,9 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
         vec3 distortedColor = texelFetch(colortex7, ivec2(fragCoord)-ivec2(mod(fragCoord, PIXELIZATION_STRENGTH)), 0).rgb;
     #endif
 
-    #if defined WATER_ON_CAMERA_EFFECT || defined ON_FIRE_DISTORT_EFFECT
-        // apply the distorted water color to the scene, but revert back to before when it ends
-        if(exitWater > 0.01 || exitLava > 0.01) color = distortedColor;
+    #if defined WATER_ON_CAMERA_EFFECT || defined ON_FIRE_DISTORT_EFFECT || defined RAIN_DROPLETS_SCREEN
+        // apply the distorted color for water, lava, and rain
+        if(exitWater > 0.01 || exitLava > 0.01 || rainStrength > 0.01) color = distortedColor;
     #endif
 
 

@@ -1827,6 +1827,11 @@ void main() {
 					Background += stars * starColor * mix(clamp(-unsigned_WsunVec.y*2.0,0.0,1.0), 1.0, clamp(cameraPosition.y-15000.0, 0.0, 45000.0)/45000.0);
 				#endif
 
+				// RGION FX: Shooting stars
+				#if defined OVERWORLD_SHADER && !defined TWILIGHT_FOREST_FLAG
+					Background += shootingStar(worldDir, frameTimeCounter, 0.0) * mix(clamp(-unsigned_WsunVec.y*2.0,0.0,1.0), 1.0, clamp(cameraPosition.y-15000.0, 0.0, 45000.0)/45000.0);
+				#endif
+
 				#if !defined AMBIENT_LIGHT_ONLY && (RESOURCEPACK_SKY == 1 || RESOURCEPACK_SKY == 0)
 					#ifdef CUSTOM_MOON_ROTATION
 						float sunMoonDist = length(unsigned_WsunVec - WmoonVec);
@@ -1926,7 +1931,14 @@ void main() {
 							vec3 moonTex = (1 - vec3(0.0, 0.5, 0.7)*clamp((1-0.5*v)*moonVis, 0.0, 1.0)) * moonphaseMult * texture(moon, moonSphericalUV).rgb;
 						#endif
 						
+						// RGION FX: Blood Moon event
 						vec3 moonLightCol = moonColorBase2;
+						#if defined BLOOD_MOON
+							float _bmDayNum = floor(worldTimeSmooth / 24000.0);
+							float _bmHash = fract(sin(_bmDayNum * 12.9898 + 78.233) * 43758.5453);
+							float _bmActive = (float(moonPhase == 0)) * step(1.0 - BLOOD_MOON_CHANCE * 0.01, _bmHash);
+							moonLightCol = mix(moonLightCol, moonLightCol * vec3(BLOOD_MOON_R, BLOOD_MOON_G, BLOOD_MOON_B), _bmActive);
+						#endif
 						Background += pow(moonTex, vec3(3.2)) * 20.0 * drawRealMoon(feetPlayerPos_normalized, WmoonVec, moonLightCol, Background, moonSize);
 					#else
 						vec3 moonLightCol = moonColorSSBO / 2400.0;
