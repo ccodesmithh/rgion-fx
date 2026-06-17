@@ -714,7 +714,7 @@ const float aperture = focal/fstop;
 // ----- COLOR/POST PROCESSING RELATED SETTINGS ----- //
 ////////////////////////////////////////////////////////
 
-#define TONEMAP ToneMap_AgX_minimal_merlin // [no_tonemapper reinhard_jodie ToneMap_AgX_minimal_merlin ToneMap_AgX_minimal ToneMap_AgX ToneMap_Hejl2015 Tonemap_Xonk Tonemap_Uchimura HableTonemap Full_Reinhard_Edit Tonemap_Full_Reinhard reinhard Tonemap_Lottes ACESFilm]
+#define TONEMAP ToneMap_RGION // [no_tonemapper reinhard_jodie ToneMap_RGION ToneMap_AgX_minimal_merlin ToneMap_AgX_minimal ToneMap_AgX ToneMap_Hejl2015 Tonemap_Xonk Tonemap_Uchimura HableTonemap Full_Reinhard_Edit Tonemap_Full_Reinhard reinhard Tonemap_Lottes ACESFilm]
 //#define USE_ACES_COLORSPACE_APPROXIMATION
 
 #define CONTRAST_ADAPTATIVE_SHARPENING
@@ -727,22 +727,22 @@ const float aperture = focal/fstop;
 #define UPPER_CURVE 0.0 // [-2.0 -1.9 -1.8 -1.7 -1.6 -1.5 -1.4 -1.3 -1.2 -1.1 -1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define LOWER_CURVE 0.0 // [-2.0 -1.9 -1.8 -1.7 -1.6 -1.5 -1.4 -1.3 -1.2 -1.1 -1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 
-// #define COLOR_GRADING_ENABLED
-#define SHADOWS_GRADE_R 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define SHADOWS_GRADE_G 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define SHADOWS_GRADE_B 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define COLOR_GRADING_ENABLED
+#define SHADOWS_GRADE_R 1.2 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define SHADOWS_GRADE_G 0.8 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define SHADOWS_GRADE_B 1.3 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define SHADOWS_GRADE_MUL 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 const vec3 SHADOWS_TARGET = length(vec3(SHADOWS_GRADE_R, SHADOWS_GRADE_G, SHADOWS_GRADE_B)) < 0.001 ? vec3(0.0) : normalize(vec3(SHADOWS_GRADE_R, SHADOWS_GRADE_G, SHADOWS_GRADE_B));
 
-#define MIDS_GRADE_R 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define MIDS_GRADE_R 1.05 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define MIDS_GRADE_G 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define MIDS_GRADE_B 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define MIDS_GRADE_B 0.95 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define MIDS_GRADE_MUL 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 const vec3 MIDS_TARGET = length(vec3(MIDS_GRADE_R, MIDS_GRADE_G, MIDS_GRADE_B)) < 0.001 ? vec3(0.0) : normalize(vec3(MIDS_GRADE_R, MIDS_GRADE_G, MIDS_GRADE_B));
 
-#define HIGHLIGHTS_GRADE_R 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define HIGHLIGHTS_GRADE_R 1.1 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define HIGHLIGHTS_GRADE_G 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define HIGHLIGHTS_GRADE_B 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#define HIGHLIGHTS_GRADE_B 0.85 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define HIGHLIGHTS_GRADE_MUL 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 const vec3 HIGHLIGHTS_TARGET = length(vec3(HIGHLIGHTS_GRADE_R, HIGHLIGHTS_GRADE_G, HIGHLIGHTS_GRADE_B)) < 0.001 ? vec3(0.0) : normalize(vec3(HIGHLIGHTS_GRADE_R, HIGHLIGHTS_GRADE_G, HIGHLIGHTS_GRADE_B));
 

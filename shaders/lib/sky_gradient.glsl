@@ -2,7 +2,14 @@
 
 vec3 drawSun(float cosY, vec3 nsunlight){
 
-	return (nsunlight/0.0008821203*pow(smoothstep(cos(0.0093084168595*3.2),cos(0.0093084168595*2.2),cosY),3.)*0.62);
+	// RGION FX: warmer, more golden sun glow with subtle purple halo
+	vec3 sunGlow = (nsunlight/0.0008821203*pow(smoothstep(cos(0.0093084168595*3.2),cos(0.0093084168595*2.2),cosY),3.)*0.62);
+
+	// Add golden warmth to the sun core
+	vec3 warmTint = vec3(1.0, 0.92, 0.7);
+	sunGlow *= warmTint;
+
+	return sunGlow;
 
 }
 const float pi = 3.141592653589793238462643383279502884197169;

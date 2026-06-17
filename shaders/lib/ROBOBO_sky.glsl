@@ -141,6 +141,10 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	float high_sun = clamp(pow(sunVector.y+0.6,5.),0.0,1.0) * 3.0; // make sunrise less blue, and allow sunset to be bluer
 	float low_sun = clamp(((1.0-abs(sunVector.y))*3.) - high_sun,1.0,2.0) ;
 	
+	// RGION FX: purple-gold ambient sky tint at twilight
+	float sunsetFactor = clamp(1.0 - abs(sunVector.y) * 5.0, 0.0, 1.0);
+	vec3 purpleTint = vec3(1.0, 0.7, 1.2);
+	
 	#if defined OVERWORLD_SHADER && defined TWILIGHT_FOREST_FLAG
 		low_sun = 2.5;
 	#endif
@@ -167,7 +171,10 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		#ifdef ORIGINAL_CHOCAPIC_SKY
 			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
 		#else
-			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible * low_sun;
+			vec3 ambientStep = sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible * low_sun;
+			// RGION FX: subtle purple tint in ambient sky at twilight
+			ambientStep *= mix(vec3(1.0), purpleTint, sunsetFactor * 0.3);
+			scatteringAmbient += ambientStep;
 		#endif
 		
 		transmittance *= stepTransmittance;

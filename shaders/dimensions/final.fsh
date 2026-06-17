@@ -134,7 +134,6 @@ float doVignette( in vec2 texcoord, in float noise){
 
   float vignette = 1.0-clamp(1.0-length(texcoord-0.5),0.0,1.0);
   
-  // vignette = pow(1.0-pow(1.0-vignette,3),5);
   vignette *= vignette*vignette;
   vignette = 1.0-vignette;
   vignette *= vignette*vignette*vignette*vignette;
@@ -143,6 +142,25 @@ float doVignette( in vec2 texcoord, in float noise){
   vignette = vignette + vignette*(noise-0.5)*0.01;
   
   return mix(1.0, vignette, VIGNETTE_STRENGTH);
+}
+
+vec3 doVignetteRGION(vec2 texcoord, vec3 color, float noise, float vignetteStrength) {
+  float vig = 1.0-clamp(1.0-length(texcoord-0.5),0.0,1.0);
+  vig *= vig*vig;
+  vig = 1.0-vig;
+  vig *= vig*vig*vig*vig;
+  vig = vig + vig*(noise-0.5)*0.01;
+
+  float vigAmount = mix(1.0, vig, vignetteStrength);
+  
+  // RGION purple-gold vignette: purple tint in shadows (edges), preserve warmth at center
+  vec3 purpleEdge = vec3(0.85, 0.75, 0.95);
+  vec3 warmCenter = vec3(1.0, 0.98, 0.92);
+  
+  float edgeFactor = 1.0 - vigAmount;
+  vec3 tint = mix(purpleEdge, warmCenter, edgeFactor);
+  
+  return color * vigAmount * tint;
 }
 
 #if DEBUG_VIEW == debug_WATERSIM && WATER_INTERACTION == 2
@@ -201,7 +219,7 @@ void main() {
   #endif
   
   #ifdef VIGNETTE
-    COLOR *= doVignette(texcoord, noise);
+    COLOR = doVignetteRGION(texcoord, COLOR, noise, VIGNETTE_STRENGTH);
   #endif
 
   #ifdef CAMERA_GRIDLINES

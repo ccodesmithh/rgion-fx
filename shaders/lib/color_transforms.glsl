@@ -400,3 +400,56 @@ vec3 reinhard_jodie(vec3 color)
 vec3 no_tonemapper(vec3 color){
     return color;
 }
+
+// RGION FX signature tonemapper - Purple-Gold split tone
+// Warm golden highlights, subtle purple shadows, rich midtones
+vec3 ToneMap_RGION(vec3 color) {
+    // AgX base (same as minimal_merlin for well-balanced HDR)
+    const mat3 AgXInsetMatrix = mat3(
+        0.842479062253094, 0.0423282422610123, 0.0423756549057051,
+        0.0784335999999992,  0.878468636469772,  0.0784336,
+        0.0792237451477643, 0.0791661274605434, 0.879142973793104);
+
+    const mat3 AgXOutsetMatrix = mat3(
+        1.19687900512017, -0.0528968517574562, -0.0529716355144438,
+        -0.0980208811401368, 1.15190312990417, -0.0980434501171241,
+        -0.0990297440797205, -0.0989611768448433, 1.15107367264116);
+
+    const float AgxMinEv = -11.47393;
+    const float AgxMaxEv = 3.226069;
+
+    color = AgXInsetMatrix * color;
+
+    color = clamp(log2(color), AgxMinEv, AgxMaxEv);
+    color = (color - AgxMinEv) / (AgxMaxEv - AgxMinEv);
+
+    color = agxDefaultContrastApprox(color);
+
+    // Apply AgX look with RGION-specific saturation
+    vec3 val = color;
+    const vec3 lw = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(val, lw);
+    float sat = 1.3;
+    val = luma + sat * (val - luma);
+
+    // RGION signature: purple-gold split tone
+    // Warmer highlights (golden), cooler shadows (purple tint)
+    float shadowWeight = clamp(1.0 - luma * 2.0, 0.0, 1.0);
+    float highlightWeight = clamp(luma * 1.5 - 0.3, 0.0, 1.0);
+
+    vec3 purpleTint = vec3(1.0, 0.85, 1.05);
+    vec3 goldTint = vec3(1.0, 0.95, 0.8);
+
+    val = val * mix(vec3(1.0), purpleTint, shadowWeight * 0.15);
+    val = val * mix(vec3(1.0), goldTint, highlightWeight * 0.1);
+
+    color = val;
+
+    color = AgXOutsetMatrix * color;
+
+    color = pow(color, vec3(2.2));
+
+    color = clamp(color, 0.0, 1.0);
+
+    return color;
+}
