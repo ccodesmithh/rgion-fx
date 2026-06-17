@@ -1,4 +1,4 @@
-Credit to the creators of the entire shader that RGION FX is an edit of:
+RGION FX is a Reforged edit, built upon the foundations of:
 
 	Azukaar / https://github.com/azukaar/Azukaar-Eclipse-Shader
 	Xonk / https://github.com/X0nk/Bliss-Shader

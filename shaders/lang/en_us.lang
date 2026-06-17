@@ -1,6 +1,22 @@
-option.SHADER_VERSION_LABEL = §d§lRGION FX§r - A Eclipse Edit
+option.SHADER_VERSION_LABEL = §d§lRGION FX§r - Reforged
     prefix.SHADER_VERSION_LABEL = V
     value.SHADER_VERSION_LABEL.482 = 6.0.0
+
+screen.RGION_FX_About = §d§lRGION FX§r
+    option.RGION_TAGLINE = §7A Minecraft shaderpack with a purple-gold visual signature
+        value.RGION_TAGLINE.0 = §7Reforged
+screen.CREDITS_CHOCAPIC = §6Chocapic13
+    option.CHOCAPIC13_CREDIT = Chocapic13 Shaders
+        value.CHOCAPIC13_CREDIT.0 = Original foundation
+screen.CREDITS_BLISS = §aBliss Shader
+    option.BLISS_CREDIT = Bliss Shader by Xonk
+        value.BLISS_CREDIT.0 = Upstream edit
+screen.CREDITS_ECLIPSE = §bEclipse Shader
+    option.ECLIPSE_CREDIT = Eclipse Shader by Azukaar
+        value.ECLIPSE_CREDIT.0 = Direct upstream
+screen.CREDITS_UPSTREAM = §dUpstream Repos
+    option.UPSTREAM_CREDIT = github.com/azukaar/Azukaar-Eclipse-Shader
+        value.UPSTREAM_CREDIT.0 = github.com/X0nk/Bliss-Shader
 
 # if you're here to translate, this is not a joke, these do what they say
 profile.POTATO=§4Potato 

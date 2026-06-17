@@ -1,4 +1,9 @@
-# RGION FX - A ECLIPSE EDIT
+# RGION FX - Reforged
 
 ## UNDER DEVELOPMENT
-### BASED ON ECLIPSE (A BLISS EDIT) https://github.com/azukaar/Azukaar-Eclipse-Shader
+A Minecraft shaderpack. 
+Rebuilt on the foundations of Eclipse Shader (a Bliss edit based on Chocapic13).
+
+https://github.com/azukaar/Azukaar-Eclipse-Shader (upstream)
+https://github.com/X0nk/Bliss-Shader (upstream)
+https://www.curseforge.com/minecraft/customization/chocapic13-shaders (upstream)
