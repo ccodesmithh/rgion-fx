@@ -1007,7 +1007,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #define RESOURCEPACK_SKY 0 // [0 1 2 3]
 
 #ifdef IS_IRIS
-	// #define TRANSLUCENT_ENTITIES
+	#define TRANSLUCENT_ENTITIES
 #endif
 
 #define TRANSLUCENT_ENTITIES_DITHER_FALLBACK

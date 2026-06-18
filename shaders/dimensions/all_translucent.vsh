@@ -30,7 +30,7 @@ out DATA {
 	vec4 normalMat;
 	vec4 tangent;
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		float chunkFade;
 	#endif
 
@@ -182,7 +182,7 @@ void main() {
 		}
 	#endif
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		chunkFade = abs(mc_chunkFade);
 	#endif
 	
@@ -190,7 +190,7 @@ void main() {
 	vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz;
 
 	#if defined PLANET_CURVATURE || (defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 1 && !defined HAND)
-		#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 1 && !defined HAND
+		#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 1 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 			worldpos.y += -45.0*(1.0-chunkFade)*(1.0-caveDetection)*smoothstep(25.0, far, length(worldpos));
 		#endif
 

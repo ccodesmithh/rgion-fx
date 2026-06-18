@@ -39,7 +39,7 @@ out DATA {
 
 	vec4 color;
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		float chunkFade;
 	#endif
 
@@ -252,7 +252,7 @@ void main() {
     /////// ----- COLOR STUFF ----- ///////
 	data_out.color = gl_Color;
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		data_out.chunkFade = abs(mc_chunkFade);
 	#endif
 
@@ -404,7 +404,7 @@ void main() {
 		}
 	#endif
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 1 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 1 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 	worldpos.y += -45.0*(1.0-data_out.chunkFade)*(1.0-caveDetection)*smoothstep(25.0, far, length(worldpos));
 	#endif
 

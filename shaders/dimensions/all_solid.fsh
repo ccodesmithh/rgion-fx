@@ -28,7 +28,7 @@
 in DATA {
 	vec4 color;
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		float chunkFade;
 	#endif
 
@@ -586,7 +586,7 @@ void main() {
 	
 	if(Albedo.a < alphaTestRef) discard;
 	
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		#ifdef TAA
 			if(sqrt(data_in.chunkFade) < BN) discard;
 		#else

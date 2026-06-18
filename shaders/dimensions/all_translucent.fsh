@@ -33,7 +33,7 @@ in DATA {
 	vec4 normalMat;
 	vec4 tangent;
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		float chunkFade;
 	#endif
 
@@ -631,7 +631,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 )	
 		gl_FragData[0] = _color;
 	#endif
 
-	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND
+	#if defined IRIS_FEATURE_FADE_VARIABLE && VANILLA_CHUNK_FADING > 0 && !defined HAND && !defined ENTITIES && !defined BLOCKENTITIES
 		gl_FragData[0].a *= sqrt(chunkFade);
 
 		#ifdef TAA
