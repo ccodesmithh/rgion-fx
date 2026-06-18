@@ -87,41 +87,47 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
     //////////////////////// RAIN DROPLETS /////////////////////
     #ifdef RAIN_DROPLETS_SCREEN
         if (rainStrength > 0.01) {
-            vec2 uv = texcoord * vec2(aspectRatio, 1.0) * 8.0;
-            float rainAnim = frameTimeCounter * 1.5;
+            vec2 uv = texcoord * vec2(aspectRatio, 1.0);
+            float totalMask = 0.0;
             
-            // two overlapping layers at different scales to break grid
-            float dropletMask = 0.0;
+            // multi-layer falling droplets with heads and trails
+            for (int i = 0; i < 5; i++) {
+                float s = 2.5 + float(i) * 1.3;
+                vec2 g = floor(uv * s + vec2(float(i) * 13.7, float(i) * 19.3));
+                vec4 seed = texture(noisetex, g * 0.1 + float(i) * 500.0);
+                float xOff = fract(seed.r * 31.4 + float(i) * 7.0);
+                float speed = 0.3 + seed.g * 0.5;
+                float yPos = 1.0 - fract(frameTimeCounter * speed + seed.b * 23.0);
+
+                // fade at edges to hide wrap (yPos 1→0 = top→bottom)
+                float fadeIn = 1.0 - smoothstep(0.7, 1.0, yPos);
+                float fadeOut = smoothstep(0.0, 0.3, yPos);
+                float lifeFade = min(fadeIn, fadeOut);
+
+                float headW = 0.025 + seed.a * 0.02;
+                float headX = smoothstep(headW, 0.0, abs(fract(uv.x * s) - xOff));
+                float headY = smoothstep(0.035, 0.0, abs(fract(uv.y * s) - yPos));
+                float headMask = headX * headY * lifeFade;
+
+                // trail above head (higher fract = higher on screen)
+                float trailDist = fract(uv.y * s) - yPos;
+                float trailLen = 0.08 + seed.r * 0.04;
+                float trailAlpha = clamp(1.0 - trailDist / trailLen, 0.0, 1.0);
+                float trailMask = headX * step(0.0, trailDist) * trailAlpha * lifeFade;
+                
+                totalMask += max(headMask, trailMask * 0.35);
+            }
             
-            // layer 1: coarse droplets
-            vec2 g1 = floor(uv);
-            vec2 c1 = g1 + 0.5 + texture(noisetex, g1 * 0.1 + rainAnim * 0.05).rg * 0.6;
-            float d1 = length(uv - c1);
-            float r1 = 0.12 + texture(noisetex, g1 * 0.1 + 50.0).r * 0.08;
-            float fall1 = 1.0 - fract(rainAnim * (0.7 + texture(noisetex, g1 * 0.1 + 100.0).r * 0.5));
-            float mask1 = smoothstep(r1 + 0.03, r1 - 0.03, d1) * fall1;
-            dropletMask += mask1;
+            // continuous rivulets
+            float riv = texture(noisetex, uv * vec2(0.25, 0.05) + vec2(0.0, frameTimeCounter * 0.06)).r;
+            float rivMask = smoothstep(0.5, 0.7, riv) * step(abs(fract(uv.x * 0.15 + frameTimeCounter * 0.02) - 0.5), 0.015);
+            totalMask = max(totalMask, rivMask * 0.6) * rainStrength * RAIN_DROPLETS_STRENGTH;
             
-            // layer 2: fine droplets, offset
-            vec2 g2 = floor(uv * 1.7 + vec2(7.3, 13.7));
-            vec2 c2 = g2 + 0.5 + texture(noisetex, g2 * 0.15 + rainAnim * 0.07 + 500.0).rg * 0.4;
-            float d2 = length(uv * 1.7 - c2);
-            float r2 = 0.06 + texture(noisetex, g2 * 0.15 + 200.0).r * 0.04;
-            float fall2 = 1.0 - fract(rainAnim * (0.5 + texture(noisetex, g2 * 0.15 + 300.0).r * 0.5));
-            dropletMask += smoothstep(r2 + 0.02, r2 - 0.02, d2) * 0.5 * fall2;
-            
-            // rivulets: irregular vertical streaks
-            vec2 rivUV = uv * vec2(0.8, 0.12) + vec2(0.0, rainAnim * 0.25);
-            float riv = texture(noisetex, rivUV).r;
-            float rivMask = smoothstep(0.55, 0.75, riv) * step(abs(fract(uv.x * 0.6 + rainAnim * 0.08) - 0.5), 0.03);
-            
-            float totalMask = max(dropletMask, rivMask * 0.5) * rainStrength * RAIN_DROPLETS_STRENGTH;
-            
-            // ADD DISTORTION for refraction effect (like water exit effect)
+            // DISTORTION
             distortmask = max(distortmask, totalMask);
             
-            // visible overlay
-            vec3 rainColor = vec3(0.8, 0.85, 0.95);
+            // overlay
+            vec3 rainColor = vec3(0.75, 0.82, 0.92);
             color = mix(color, rainColor, totalMask);
         }
     #endif
