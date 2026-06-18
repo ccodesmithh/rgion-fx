@@ -565,7 +565,7 @@ vec3 doBlockHandLighting(
 ){
     vec3 blockLight = vec3(0.0);
 
-    #ifdef Hand_Held_lights
+    #if defined Hand_Held_lights && defined IS_LPV_ENABLED
         // create handheld lightsources
 
         if (heldItemId > 0){
