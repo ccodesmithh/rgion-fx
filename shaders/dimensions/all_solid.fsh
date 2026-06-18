@@ -357,6 +357,20 @@ layout(location = 2) out vec4 OutNormalAO;
 	/* RENDERTARGETS:1,8,15 */
 #endif
 
+float hash12(vec2 p) {
+	vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+float valueNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash12(i), hash12(i + vec2(1.0, 0.0)), f.x),
+               mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
 void main() {
 	vec3 FragCoord = gl_FragCoord.xyz;
 
@@ -618,62 +632,85 @@ void main() {
 		#endif
 	#endif
 	
-	#if defined WORLD && !defined ENTITIES && !defined HAND && defined BLOCKENTITIES && !defined COLORWHEEL
+		#if defined WORLD && !defined ENTITIES && !defined HAND && defined BLOCKENTITIES && !defined COLORWHEEL
 		bool PORTAL = data_in.blockID == BLOCK_END_PORTAL || data_in.blockID == 187;
 
 		float endPortalEmission = 0.0;
 		if(PORTAL) {
-			const float steps = 20.0;
-
-			vec3 color = vec3(0.0);
-			float absorbance = 1.0;
-
 			vec3 worldSpaceNormal = flatNormals;
+			vec3 worldDir = normalize(playerpos);
+			float dNV = dot(worldDir, worldSpaceNormal);
+			float zDepth = max(-dNV, 0.001);
+			vec3 parallaxStep = worldDir / zDepth;
+			vec3 absWorldPos = playerpos + cameraPosition;
 
-			vec3 viewVec = normalize(tbnMatrix*fragpos);
-			vec3 correctedViewVec = viewVec;
+			vec3 finalColor = vec3(0.0);
+			float finalEmission = 0.0;
 			
-			correctedViewVec.xy = mix(correctedViewVec.xy, vec2( viewVec.y,-viewVec.x), clamp( worldSpaceNormal.y,0,1));
-			correctedViewVec.xy = mix(correctedViewVec.xy, vec2(-viewVec.y, viewVec.x), clamp(-worldSpaceNormal.x,0,1)); 
-			correctedViewVec.xy = mix(correctedViewVec.xy, vec2(-viewVec.y, viewVec.x), clamp(-worldSpaceNormal.z,0,1));
-			
-			correctedViewVec.z = mix(correctedViewVec.z, -correctedViewVec.z, clamp(length(vec3(worldSpaceNormal.xz, clamp(-worldSpaceNormal.y,0,1))),0,1)); 
-			
-			vec2 correctedWorldPos = playerpos.xz + cameraPosition.xz;
-			correctedWorldPos = mix(correctedWorldPos,	vec2(-playerpos.x,playerpos.z)	+	vec2(-cameraPosition.x,cameraPosition.z),	clamp(-worldSpaceNormal.y,0,1));
-			correctedWorldPos = mix(correctedWorldPos,	vec2( playerpos.z,playerpos.y)	+	vec2( cameraPosition.z,cameraPosition.y),	clamp( worldSpaceNormal.x,0,1));
-			correctedWorldPos = mix(correctedWorldPos,	vec2(-playerpos.z,playerpos.y)	+	vec2(-cameraPosition.z,cameraPosition.y),	clamp(-worldSpaceNormal.x,0,1));
-			correctedWorldPos = mix(correctedWorldPos,	vec2( playerpos.x,playerpos.y)	+	vec2( cameraPosition.x,cameraPosition.y),	clamp(-worldSpaceNormal.z,0,1));
-			correctedWorldPos = mix(correctedWorldPos,	vec2(-playerpos.x,playerpos.y)	+	vec2(-cameraPosition.x,cameraPosition.y),	clamp( worldSpaceNormal.z,0,1));
-
-
-			vec2 rayDir = ((correctedViewVec.xy) / -correctedViewVec.z) / steps * 5.0 ;
-		
-			vec2 uv = correctedWorldPos + rayDir * BN;
-			uv += rayDir * 10.0;
-
-			vec2 animation = vec2(frameTimeCounter, -frameTimeCounter)*0.01;
-			
-			for (int i = 0; i < int(steps); i++) {
+			// Deep dark void effect
+			for(int i = 1; i <= 8; i++) {
+				float fi = float(i);
+				vec3 parallaxPos = absWorldPos + parallaxStep * (fi * 1.2);
 				
-				float verticalGradient = (i + BN)/steps ;
-				float verticalGradient2 = exp(-7*(1-verticalGradient*verticalGradient));
-			
-				float density = max(max(verticalGradient - texture(noisetex, uv/256.0 + animation.xy).b*0.5,0.0) - (1.0-texture(noisetex, uv/32.0 + animation.xx).r) * (0.4 + 0.1 * (texture(noisetex, uv/10.0 - animation.yy).b)),0.0);
-			
-				float volumeCoeff = exp(-density*(i+1));
+				vec2 pUV;
+				if (abs(worldSpaceNormal.y) > 0.5) pUV = parallaxPos.xz;
+				else if (abs(worldSpaceNormal.x) > 0.5) pUV = parallaxPos.zy;
+				else pUV = parallaxPos.xy;
+				pUV *= 0.1; // Scale for large nebula clouds
 				
-				vec3 lighting =  vec3(0.5,0.75,1.0) * 0.1 * exp(-10*density) + vec3(0.8,0.3,1.0) * verticalGradient2 * 1.7;
-				color += (lighting - lighting * volumeCoeff) * absorbance;;
+				// Slow, subtle swirling rotation
+				float timeOffset = frameTimeCounter * 0.005 * (1.0 + fi * 0.2);
+				float c = cos(timeOffset);
+				float s = sin(timeOffset);
+				mat2 rot = mat2(c, -s, s, c);
+				pUV = rot * pUV;
+				
+				// Procedural noise A & B for Nebula
+				float noiseA = valueNoise(pUV * 2.0 + vec2(timeOffset));
+				float noiseB = valueNoise(pUV * 3.0 - vec2(timeOffset * 0.5));
+				
+				// Smoothstep to create wispy dark clouds instead of bright walls
+				noiseA = smoothstep(0.35, 0.75, noiseA);
+				noiseB = smoothstep(0.35, 0.75, noiseB);
+				
+				// Tiny, sharp, round stars
+				vec2 starPos = pUV * 200.0 + vec2(fi * 13.0);
+				vec2 starGrid = floor(starPos);
+				vec2 starFract = fract(starPos);
+				float starHash = hash12(starGrid);
+				
+				// 1.5% chance for a star, heavily boosted brightness
+				float starBrightness = step(0.985, starHash) * (starHash - 0.985) * 66.0; 
+				// Shape into a soft round dot instead of a square block
+				float starShape = smoothstep(0.4, 0.05, length(starFract - 0.5));
+				float stars = starBrightness * starShape;
+				
+				// Twinkling effect
+				stars *= 0.5 + 0.5 * sin(frameTimeCounter * 2.0 + starHash * 100.0);
+				
+				// Dark nebula intensity
+				float nebula = noiseA * noiseB;
+				
+				// Deep Space Color Palette (Deep Navy Blue to Dark Magenta/Plum)
+				vec3 layerColor = mix(vec3(0.02, 0.1, 0.3), vec3(0.3, 0.02, 0.4), fract(fi * 0.27 + timeOffset * 0.2));
+				
+				float layerWeight = 1.0 / (fi * 0.8);
+				
+				// Add a subtle blueish tint to the stars
+				finalColor += (layerColor * nebula * 2.5 + vec3(0.6, 0.8, 1.0) * stars) * layerWeight;
+				finalEmission += (stars + nebula * 0.2) * layerWeight;
+			}
+			
+			// Deep void baseline (pitch black with a subtle purple tint)
+			finalColor = finalColor * 0.6 + vec3(0.015, 0.005, 0.025);
 
-				absorbance *= volumeCoeff;
-				endPortalEmission += verticalGradient*verticalGradient ;
-				uv += rayDir;
+			// Anti-NaN safeguard just in case
+			if (isnan(finalColor.x) || isnan(finalColor.y) || isnan(finalColor.z)) {
+				finalColor = vec3(0.0, 1.0, 0.0); // Debug Green if NaN occurs
 			}
 
-			Albedo.rgb = clamp(color,0,1);
-			endPortalEmission = clamp(endPortalEmission/steps * 1.0,0.0,254.0/255.0);
-			
+			Albedo.rgb = clamp(finalColor, 0.0, 1.0);
+			endPortalEmission = clamp(finalEmission * 0.8, 0.0, 254.0/255.0);
 		}
 	#endif
 	
