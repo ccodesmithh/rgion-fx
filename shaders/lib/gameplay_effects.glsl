@@ -16,6 +16,7 @@ uniform float enterWater;
 uniform float exitLava;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
+uniform ivec2 eyeBrightnessSmooth;
 
 // uniform float currentPlayerHunger;
 // uniform float maxPlayerHunger;
@@ -87,6 +88,21 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
     //////////////////////// RAIN DROPLETS /////////////////////
     #ifdef RAIN_DROPLETS_SCREEN
         if (rainStrength > 0.01) {
+            // depth-based occlusion: vanish when close to blocks or underwater
+            float rawDepth = texture(depthtex1, texcoord * RENDER_SCALE).r;
+            float linearDepth = ld(rawDepth);
+            float depthFade = smoothstep(0.05, 0.3, linearDepth);
+
+            if (isEyeInWater == 1) depthFade = 0.0;
+
+            // global shelter detection: hide droplets entirely when player is under a block
+            // eyeBrightnessSmooth.y is the sky light level at the player's eye position (0-240)
+            // sky light 15 (240) = fully outdoors, 14 or less = under a block
+            // smoothstep(0.93, 1.0) ensures even a single block above fully removes droplets
+            float skyLight = clamp(eyeBrightnessSmooth.y / 240.0, 0.0, 1.0);
+            float shelterFade = smoothstep(0.93, 1.0, skyLight);
+            depthFade *= shelterFade;
+
             vec2 uv = texcoord * vec2(aspectRatio, 1.0);
             float totalMask = 0.0;
             
@@ -121,7 +137,7 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
             // continuous rivulets
             float riv = texture(noisetex, uv * vec2(0.25, 0.05) + vec2(0.0, frameTimeCounter * 0.06)).r;
             float rivMask = smoothstep(0.5, 0.7, riv) * step(abs(fract(uv.x * 0.15 + frameTimeCounter * 0.02) - 0.5), 0.015);
-            totalMask = max(totalMask, rivMask * 0.6) * rainStrength * RAIN_DROPLETS_STRENGTH;
+            totalMask = max(totalMask, rivMask * 0.6) * rainStrength * RAIN_DROPLETS_STRENGTH * depthFade;
             
             // DISTORTION
             distortmask = max(distortmask, totalMask);
